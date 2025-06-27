@@ -1,5 +1,38 @@
 # Linked Lists
 
+
+```
+
+struct LinkedListNode {
+    int val;
+    LinkedListNode *next;
+    LinkedListNode(int val): val (val), next(nullptr) {}
+};
+
+int main() {
+    LinkedListNode* one = new LinkedListNode(1);
+    LinkedListNode* two = new LinkedListNode(2);
+    LinkedListNode* three = new LinkedListNode(3);
+    one->next = two;
+    two->next = three;
+    LinkedListNode* head = one;
+    
+    cout << head->val << endl;
+    cout << head->next->val << endl;
+    cout << head->next->next->val << endl;
+}
+LinkedListNode* one = new LinkedListNode(1);    // Allocate node on heap
+LinkedListNode* two = new LinkedListNode(2);
+LinkedListNode* three = new LinkedListNode(3);
+
+// Linking nodes:
+one->next = two;        // one's next pointer points to two's address
+two->next = three;      // two's next pointer points to three's address
+
+// The -> operator is shorthand for (*ptr).member
+one->next;              // Same as (*one).next
+one->next->val;         // Same as (*((*one).next)).val or (*two).val
+```
 ## ListNode Definition
 ```cpp
 struct ListNode {

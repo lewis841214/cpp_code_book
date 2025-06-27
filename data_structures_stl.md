@@ -48,6 +48,34 @@ s.lower_bound(5);        // First element >= 5
 s.upper_bound(5);        // First element > 5
 s.size();                // Number of elements
 
+// "Pop" operations (get and remove element)
+// Method 1: Get first element and remove it
+if (!s.empty()) {
+    int first = *s.begin();  // * is dereference operator - gets the VALUE that the iterator points to
+    s.erase(s.begin());      // Remove it
+}
+
+// Method 2: Get last element and remove it
+if (!s.empty()) {
+    auto it = s.end();
+    --it;                    // Move to last element
+    int last = *it;          // Get last (largest) element
+    s.erase(it);             // Remove it
+}
+
+// Method 3: Using extract() (C++17) - removes and returns node
+if (!s.empty()) {
+    auto node = s.extract(s.begin());  // Extract first element
+    int value = node.value();          // Get the value
+    // node is automatically destroyed, element is removed from set
+}
+
+// Get any element when you know there's only one
+if (s.size() == 1) {
+    int onlyElement = *s.begin();
+    s.clear();  // or s.erase(s.begin());
+}
+
 // Multiset allows duplicates
 multiset<int> ms;
 ms.insert(5);
@@ -69,9 +97,41 @@ for (auto& p : m) {
 }
 
 // Unordered_map (hash table) - faster average case
-unordered_map<int, string> um;
-um[1] = "one";
-// Same operations as map but O(1) average time
+/ Declaration: C++ supports multiple implementations, but we will be using
+// std::unordered_map. Specify the data type of the keys and values.
+unordered_map<int, int> hashMap;
+
+// If you want to initialize it with some key value pairs, use the following syntax:
+unordered_map<int, int> hashMap = {{1, 2}, {5, 3}, {7, 2}};
+
+// Checking if a key exists: use the following syntax:
+hashMap.contains(1); // true (1)
+hashMap.contains(9); // false (0)
+
+// Accessing a value given a key: use square brackets, similar to an array.
+hashMap[5]; // 3
+
+// Note: if you were to access a key that does not exist, it creates the key with a default value of 0.
+hashMap[342]; // 0
+
+// Adding or updating a key: use square brackets, similar to an array.
+// If the key already exists, the value will be updated
+hashMap[5] = 6;
+
+// If the key doesn't exist yet, the key value pair will be inserted
+hashMap[9] = 15;
+
+// Deleting a key: use the .erase() method.
+hashMap.erase(9);
+
+// Get size
+hashMap.size(); // 3
+
+// Iterate over the key value pairs: use the following code.
+// .first gets the key and .second gets the value.
+for (auto const& pair: hashMap) {
+    cout << pair.first << " " << pair.second << endl;
+}
 ```
 
 ## Priority Queue (Heap)
@@ -169,24 +229,92 @@ next_permutation(v.begin(), v.end());
 prev_permutation(v.begin(), v.end());
 ```
 
-## Useful Iterators
+## Vector Iteration Methods (Best Practices)
 ```cpp
-vector<int> v = {1, 2, 3, 4, 5};
+vector<int> arr = {1, 2, 3, 4, 5};
 
-// Range-based for loop
-for (int x : v) {
+// Method 1: Range-based for loop (RECOMMENDED for read-only)
+// Pro: Clean, safe, no bounds checking needed
+for (int x : arr) {
+    cout << x << " ";  // x is a copy, can't modify original
+}
+
+// Method 2: Range-based with reference (RECOMMENDED for modifications)
+// Pro: No copying, can modify elements, clean syntax
+for (int& x : arr) {
+    x *= 2;           // Modifies original element
     cout << x << " ";
 }
 
-// Iterator loop
-for (auto it = v.begin(); it != v.end(); it++) {
-    cout << *it << " ";
+// Method 3: Range-based with const reference (RECOMMENDED for large objects)
+// Pro: No copying, prevents accidental modification
+for (const int& x : arr) {
+    cout << x << " ";  // Can't modify x
 }
 
-// Reverse iterator
-for (auto it = v.rbegin(); it != v.rend(); it++) {
-    cout << *it << " ";
+// Method 4: Index-based loop (RECOMMENDED when you need the index)
+// Pro: You get both index and value
+for (size_t i = 0; i < arr.size(); i++) {
+    cout << "arr[" << i << "] = " << arr[i] << endl;
+    arr[i] *= 2;      // Can modify
 }
+
+// Method 5: Iterator loop (when you need iterator operations)
+// Pro: Works with all STL containers, more flexible
+for (auto it = arr.begin(); it != arr.end(); ++it) {
+    cout << *it << " ";  // * dereferences iterator to get value
+    *it *= 2;            // Can modify through iterator
+}
+
+// Method 6: Reverse iteration
+for (auto it = arr.rbegin(); it != arr.rend(); ++it) {
+    cout << *it << " ";  // Prints in reverse order
+}
+
+// Method 7: Using algorithms (functional approach)
+// Pro: Expressive, can be parallelized
+#include <algorithm>
+std::for_each(arr.begin(), arr.end(), [](int& x) {
+    x *= 2;
+    cout << x << " ";
+});
+
+// PERFORMANCE TIP: Use ++it instead of it++ for iterators
+// ++it is slightly faster as it doesn't create a temporary copy
+```
+
+## When to Use Each Method
+```cpp
+// Use range-based for loop when:
+// - You just need to read/process each element
+// - You don't need the index
+// - Code readability is important
+for (const auto& element : arr) { /* process element */ }
+
+// Use index-based loop when:
+// - You need the index for logic
+// - You're working with multiple arrays simultaneously
+// - You need to skip elements or jump around
+for (size_t i = 0; i < arr.size(); i++) { /* use arr[i] and i */ }
+
+// Use iterators when:
+// - You need to insert/erase during iteration
+// - You're writing generic code that works with different containers
+// - You need advanced iterator operations
+for (auto it = arr.begin(); it != arr.end(); ++it) { /* use *it */ }
+```
+
+## Understanding the dereference operator (*)
+```cpp
+vector<int> nums = {10, 20, 30};
+auto it = nums.begin();     // it is an iterator (like a pointer)
+cout << it;                 // This would print the iterator itself (memory address-like)
+cout << *it;                // This prints 10 (the VALUE the iterator points to)
+
+// Without *, you get the iterator; with *, you get the value
+int value = *it;            // value = 10
+it++;                       // Move iterator to next element
+int nextValue = *it;        // nextValue = 20
 ```
 
 ## Custom Comparators
